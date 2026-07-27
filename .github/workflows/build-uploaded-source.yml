@@ -33,14 +33,12 @@ jobs:
             grub-pc-bin grub-efi-amd64-bin mtools \
             qemu-system-x86 ovmf
 
-      - name: Patch legacy live-build for current Debian
+      - name: Patch legacy live-build Contents index paths
         run: |
           sudo sed -i 's#/dists/${LB_PARENT_DISTRIBUTION}/Contents-#/dists/${LB_PARENT_DISTRIBUTION}/main/Contents-#g' \
             /usr/lib/live/build/lb_chroot_linux-image \
             /usr/lib/live/build/lb_binary_debian-installer
           grep -F '/main/Contents-' /usr/lib/live/build/lb_chroot_linux-image /usr/lib/live/build/lb_binary_debian-installer
-          sudo grep -rl 'live-config' /usr/lib/live/build | sudo xargs sed -i -e 's/live-config-sysvinit//g' -e 's/live-config/live-config-systemd/g'
-          if sudo grep -r 'live-config-sysvinit|live-config-systemd-sysvinit' /usr/lib/live/build; then exit 1; fi
 
       - name: Extract canonical Stage 0 source
         run: |
@@ -55,6 +53,7 @@ jobs:
           sed -i '/--mirror-binary-security/a\  --security false \\' source/Nexus-OS/distro/live-build/auto/config
           sed -i '/--security false/a\  --apt-indices false \\' source/Nexus-OS/distro/live-build/auto/config
           sed -i '/--apt-indices false/a\  --apt-recommends false \\' source/Nexus-OS/distro/live-build/auto/config
+          sed -i '/--apt-recommends false/a\  --init-system systemd \\' source/Nexus-OS/distro/live-build/auto/config
           mkdir -p source/Nexus-OS/distro/live-build/config/archives
           printf '%s\n' 'deb http://security.debian.org/debian-security trixie-security main contrib non-free-firmware' > source/Nexus-OS/distro/live-build/config/archives/debian-security.list.chroot
           sed -i -e 's/^live-config$/live-config-systemd/' -e '/^steam-installer$/d' -e '/^gamescope$/d' source/Nexus-OS/distro/live-build/config/package-lists/nexusos.list.chroot
