@@ -53,6 +53,7 @@ jobs:
           sed -i '/--mirror-binary-security/a\  --security false \\' source/Nexus-OS/distro/live-build/auto/config
           sed -i '/--security false/a\  --apt-indices false \\' source/Nexus-OS/distro/live-build/auto/config
           sed -i '/--apt-indices false/a\  --apt-recommends false \\' source/Nexus-OS/distro/live-build/auto/config
+          sed -i '/^ISO="$(find/a\[[ -n "$ISO" ]] || ISO="$WORK/live-image-amd64.hybrid.iso"' source/Nexus-OS/scripts/build-iso.sh
           mkdir -p source/Nexus-OS/distro/live-build/config/archives
           printf '%s\n' 'deb http://security.debian.org/debian-security trixie-security main contrib non-free-firmware' > source/Nexus-OS/distro/live-build/config/archives/debian-security.list.chroot
           sed -i -e 's/^live-config$/live-config-systemd/' -e '/^steam-installer$/d' -e '/^gamescope$/d' source/Nexus-OS/distro/live-build/config/package-lists/nexusos.list.chroot
@@ -64,22 +65,8 @@ jobs:
       - name: Build hybrid desktop ISO
         working-directory: source/Nexus-OS
         run: |
-          status=0
-          sudo ./scripts/build-iso.sh desktop || status=$?
-          generated=$(sudo find distro/live-build/.build/desktop -maxdepth 1 -name '*.iso' -print -quit)
-          if [[ -n "$generated" ]]; then
-            version=$(tr -d '[:space:]' < VERSION)
-            output=dist/NexusOS-${version}-desktop-amd64.iso
-            volume=$(printf 'NEXUSOS_%s' "$version" | tr '[:lower:].-' '[:upper:]__' | tr -cd '[:alnum:]_' | cut -c1-32)
-            sudo cp "$generated" "$output"
-            sudo chown -R "$(id -u):$(id -g)" dist
-            sha256sum "$output" > "$output.sha256"
-            ./scripts/inspect-iso.sh "$output" "$volume"
-            status=0
-          fi
-          echo "generated ISO: $generated"
-          echo "build-iso status: $status"
-          exit "$status"
+          sudo ./scripts/build-iso.sh desktop
+          sudo chown -R "$(id -u):$(id -g)" dist
 
       - name: Verify checksum
         working-directory: source/Nexus-OS
