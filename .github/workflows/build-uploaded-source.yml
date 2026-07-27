@@ -28,21 +28,16 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            unzip cmake ninja-build g++ \
+            git unzip cmake ninja-build g++ \
             live-build xorriso debootstrap squashfs-tools debian-archive-keyring \
             grub-pc-bin grub-efi-amd64-bin mtools \
             qemu-system-x86 ovmf
 
-      - name: Patch legacy live-build for current Debian
+      - name: Install current official Debian live-build
         run: |
-          sudo sed -i 's#/dists/${LB_PARENT_DISTRIBUTION}/Contents-#/dists/${LB_PARENT_DISTRIBUTION}/main/Contents-#g' \
-            /usr/lib/live/build/lb_chroot_linux-image \
-            /usr/lib/live/build/lb_binary_debian-installer
-          grep -F '/main/Contents-' /usr/lib/live/build/lb_chroot_linux-image /usr/lib/live/build/lb_binary_debian-installer
-          sudo find /usr/lib/live/build /usr/share/live/build -type f -exec perl -pi -e 's/(?<![\w-])lilo(?![\w-])//g; s/(?<![\w-])grub(?![\w-])/grub-pc/g; s/linux-image-2\.6-amd64/linux-image-amd64/g' {} +
-          sudo find /usr/lib/live/build /usr/share/live/build -type f -exec sed -i \
-            -e 's#root/isolinux/isolinux.bin#usr/lib/ISOLINUX/isolinux.bin#g' \
-            -e 's#root/isolinux/vesamenu.c32#usr/lib/syslinux/modules/bios/vesamenu.c32#g' {} +
+          git clone --depth 1 https://salsa.debian.org/live-team/live-build.git /tmp/current-live-build
+          sudo make -C /tmp/current-live-build install
+          /usr/local/bin/lb --version
 
       - name: Extract canonical Stage 0 source
         run: |
@@ -51,13 +46,12 @@ jobs:
           unzip -q Nexus-OS-Stage0-r3-local-repository.zip -d source
           test -x source/Nexus-OS/scripts/build-iso.sh
 
-      - name: Apply Debian repository compatibility
+      - name: Apply Debian 13 repository compatibility
         run: |
           sed -i 's/bookworm/trixie/g' source/Nexus-OS/distro/live-build/auto/config
           sed -i '/--mirror-binary-security/a\  --security false \\' source/Nexus-OS/distro/live-build/auto/config
           sed -i '/--security false/a\  --apt-indices false \\' source/Nexus-OS/distro/live-build/auto/config
           sed -i '/--apt-indices false/a\  --apt-recommends false \\' source/Nexus-OS/distro/live-build/auto/config
-          sed -i '/--apt-recommends false/a\  --initsystem systemd \\' source/Nexus-OS/distro/live-build/auto/config
           mkdir -p source/Nexus-OS/distro/live-build/config/archives
           printf '%s\n' 'deb http://security.debian.org/debian-security trixie-security main contrib non-free-firmware' > source/Nexus-OS/distro/live-build/config/archives/debian-security.list.chroot
           sed -i -e 's/^live-config$/live-config-systemd/' -e '/^steam-installer$/d' -e '/^gamescope$/d' source/Nexus-OS/distro/live-build/config/package-lists/nexusos.list.chroot
@@ -68,7 +62,9 @@ jobs:
 
       - name: Build hybrid desktop ISO
         working-directory: source/Nexus-OS
-        run: sudo ./scripts/build-iso.sh desktop
+        env:
+          PATH: /usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin
+        run: sudo --preserve-env=PATH ./scripts/build-iso.sh desktop
 
       - name: Verify checksum
         working-directory: source/Nexus-OS
