@@ -70,8 +70,7 @@ jobs:
           status=$?
           set -e
           echo "build-iso status: $status"
-          find distro/live-build/.build/desktop -maxdepth 4 \(
-            -type f -o -type l \) -printf '%y %p -> %l\n' | sort | tail -250
+          find distro/live-build/.build/desktop -maxdepth 4 -printf '%y %s %p -> %l\n' | sort -k2,2n | tail -250
           exit "$status"
 
       - name: Verify checksum
