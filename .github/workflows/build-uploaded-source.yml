@@ -39,8 +39,8 @@ jobs:
             /usr/lib/live/build/lb_chroot_linux-image \
             /usr/lib/live/build/lb_binary_debian-installer
           grep -F '/main/Contents-' /usr/lib/live/build/lb_chroot_linux-image /usr/lib/live/build/lb_binary_debian-installer
-          sudo grep -rl 'live-config' /usr/lib/live/build | sudo xargs sed -i 's/live-config/live-config-systemd/g'
-          sudo grep -r 'live-config-systemd' /usr/lib/live/build
+          sudo grep -rl 'live-config' /usr/lib/live/build | sudo xargs sed -i -e 's/live-config-sysvinit//g' -e 's/live-config/live-config-systemd/g'
+          if sudo grep -r 'live-config-sysvinit|live-config-systemd-sysvinit' /usr/lib/live/build; then exit 1; fi
 
       - name: Extract canonical Stage 0 source
         run: |
