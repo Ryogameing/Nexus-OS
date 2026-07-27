@@ -1,0 +1,72 @@
+name: Build uploaded NexusOS ISO
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "Nexus-OS-Stage0-local-repository.zip"
+      - ".github/workflows/build-uploaded-source.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nexusos-uploaded-iso
+  cancel-in-progress: true
+
+jobs:
+  build-and-boot-test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - name: Check out bootstrap repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Install ISO build and test dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            unzip cmake ninja-build g++ \
+            live-build xorriso debootstrap squashfs-tools \
+            grub-pc-bin grub-efi-amd64-bin mtools \
+            qemu-system-x86 ovmf
+
+      - name: Extract canonical Stage 0 source
+        run: |
+          rm -rf source
+          mkdir source
+          unzip -q Nexus-OS-Stage0-local-repository.zip -d source
+          test -x source/Nexus-OS/scripts/build-iso.sh
+
+      - name: Validate source
+        working-directory: source/Nexus-OS
+        run: ./scripts/validate-release.sh
+
+      - name: Build hybrid desktop ISO
+        working-directory: source/Nexus-OS
+        run: sudo ./scripts/build-iso.sh desktop
+
+      - name: Verify checksum
+        working-directory: source/Nexus-OS
+        run: sha256sum -c dist/*.iso.sha256
+
+      - name: Verify BIOS boot
+        working-directory: source/Nexus-OS
+        run: sudo env NEXUS_QEMU_TIMEOUT=240 ./scripts/test-iso-qemu.sh dist/*.iso bios
+
+      - name: Verify UEFI boot
+        working-directory: source/Nexus-OS
+        run: sudo env NEXUS_QEMU_TIMEOUT=240 ./scripts/test-iso-qemu.sh dist/*.iso uefi
+
+      - name: Upload Rufus-ready ISO
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: NexusOS-Rufus-ready-desktop-amd64
+          path: |
+            source/Nexus-OS/dist/*.iso
+            source/Nexus-OS/dist/*.iso.sha256
+            source/Nexus-OS/dist/*.qemu.log
+          if-no-files-found: error
+          retention-days: 7
