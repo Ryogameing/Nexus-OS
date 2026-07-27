@@ -53,7 +53,7 @@ jobs:
           sed -i '/--mirror-binary-security/a\  --security false \\' source/Nexus-OS/distro/live-build/auto/config
           sed -i '/--security false/a\  --apt-indices false \\' source/Nexus-OS/distro/live-build/auto/config
           sed -i '/--apt-indices false/a\  --apt-recommends false \\' source/Nexus-OS/distro/live-build/auto/config
-          sed -i '/--apt-recommends false/a\  --init-system systemd \\' source/Nexus-OS/distro/live-build/auto/config
+          sed -i '/--apt-recommends false/a\  --initsystem systemd \\' source/Nexus-OS/distro/live-build/auto/config
           mkdir -p source/Nexus-OS/distro/live-build/config/archives
           printf '%s\n' 'deb http://security.debian.org/debian-security trixie-security main contrib non-free-firmware' > source/Nexus-OS/distro/live-build/config/archives/debian-security.list.chroot
           sed -i -e 's/^live-config$/live-config-systemd/' -e '/^steam-installer$/d' -e '/^gamescope$/d' source/Nexus-OS/distro/live-build/config/package-lists/nexusos.list.chroot
