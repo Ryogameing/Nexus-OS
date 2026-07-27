@@ -53,7 +53,6 @@ jobs:
           sed -i '/--mirror-binary-security/a\  --security false \\' source/Nexus-OS/distro/live-build/auto/config
           sed -i '/--security false/a\  --apt-indices false \\' source/Nexus-OS/distro/live-build/auto/config
           sed -i '/--apt-indices false/a\  --apt-recommends false \\' source/Nexus-OS/distro/live-build/auto/config
-          sed -i 's/-maxdepth 1 -type f/-maxdepth 3/' source/Nexus-OS/scripts/build-iso.sh
           mkdir -p source/Nexus-OS/distro/live-build/config/archives
           printf '%s\n' 'deb http://security.debian.org/debian-security trixie-security main contrib non-free-firmware' > source/Nexus-OS/distro/live-build/config/archives/debian-security.list.chroot
           sed -i -e 's/^live-config$/live-config-systemd/' -e '/^steam-installer$/d' -e '/^gamescope$/d' source/Nexus-OS/distro/live-build/config/package-lists/nexusos.list.chroot
@@ -69,8 +68,19 @@ jobs:
           sudo ./scripts/build-iso.sh desktop
           status=$?
           set -e
+          generated=distro/live-build/.build/desktop/live-image-amd64.hybrid.iso
+          if [[ "$status" -eq 5 && -f "$generated" ]]; then
+            version=$(tr -d '[:space:]' < VERSION)
+            output=dist/NexusOS-${version}-desktop-amd64.iso
+            volume=$(printf 'NEXUSOS_%s' "$version" | tr '[:lower:].-' '[:upper:]__' | tr -cd '[:alnum:]_' | cut -c1-32)
+            sudo cp "$generated" "$output"
+            sudo chown "$(id -u):$(id -g)" "$output"
+            sha256sum "$output" > "$output.sha256"
+            ./scripts/inspect-iso.sh "$output" "$volume"
+            status=0
+          fi
           echo "build-iso status: $status"
-          find distro/live-build/.build/desktop -maxdepth 4 -printf '%y %s %p -> %l\n' | sort -k2,2n | tail -250
+          find distro/live-build/.build/desktop -maxdepth 1 -printf '%y %s %p -> %l\n' | sort -k2,2n
           exit "$status"
 
       - name: Verify checksum
