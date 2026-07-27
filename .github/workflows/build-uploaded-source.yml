@@ -33,10 +33,12 @@ jobs:
             grub-pc-bin grub-efi-amd64-bin mtools \
             qemu-system-x86 ovmf
 
-      - name: Patch legacy live-build Contents index path
+      - name: Patch legacy live-build Contents index paths
         run: |
-          sudo sed -i 's#/dists/${LB_PARENT_DISTRIBUTION}/Contents-#/dists/${LB_PARENT_DISTRIBUTION}/main/Contents-#' /usr/lib/live/build/lb_chroot_linux-image
-          grep -F '/main/Contents-' /usr/lib/live/build/lb_chroot_linux-image
+          sudo sed -i 's#/dists/${LB_PARENT_DISTRIBUTION}/Contents-#/dists/${LB_PARENT_DISTRIBUTION}/main/Contents-#g' \
+            /usr/lib/live/build/lb_chroot_linux-image \
+            /usr/lib/live/build/lb_binary_debian-installer
+          grep -F '/main/Contents-' /usr/lib/live/build/lb_chroot_linux-image /usr/lib/live/build/lb_binary_debian-installer
 
       - name: Extract canonical Stage 0 source
         run: |
