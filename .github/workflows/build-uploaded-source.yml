@@ -64,7 +64,15 @@ jobs:
 
       - name: Build hybrid desktop ISO
         working-directory: source/Nexus-OS
-        run: sudo ./scripts/build-iso.sh desktop
+        run: |
+          set +e
+          sudo ./scripts/build-iso.sh desktop
+          status=$?
+          set -e
+          echo "build-iso status: $status"
+          find distro/live-build/.build/desktop -maxdepth 4 \(
+            -type f -o -type l \) -printf '%y %p -> %l\n' | sort | tail -250
+          exit "$status"
 
       - name: Verify checksum
         working-directory: source/Nexus-OS
