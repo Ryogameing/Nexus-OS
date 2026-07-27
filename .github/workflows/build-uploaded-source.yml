@@ -50,6 +50,7 @@ jobs:
         run: |
           sed -i 's/bookworm/trixie/g' source/Nexus-OS/distro/live-build/auto/config
           sed -i 's/quiet splash/console=ttyS0,115200n8/g' source/Nexus-OS/distro/live-build/auto/config
+          sed -i 's/quiet splash/console=ttyS0,115200n8/g' source/Nexus-OS/scripts/build-iso.sh
           sed -i 's/--binary-images/--binary-image/' source/Nexus-OS/distro/live-build/auto/config
           sed -i '/--mirror-binary-security/a\  --security false \\' source/Nexus-OS/distro/live-build/auto/config
           sed -i '/--security false/a\  --apt-indices false \\' source/Nexus-OS/distro/live-build/auto/config
