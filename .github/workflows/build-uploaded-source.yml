@@ -40,6 +40,9 @@ jobs:
             /usr/lib/live/build/lb_binary_debian-installer
           grep -F '/main/Contents-' /usr/lib/live/build/lb_chroot_linux-image /usr/lib/live/build/lb_binary_debian-installer
           sudo find /usr/lib/live/build /usr/share/live/build -type f -exec perl -pi -e 's/(?<![\w-])lilo(?![\w-])//g; s/(?<![\w-])grub(?![\w-])/grub-pc/g; s/linux-image-2\.6-amd64/linux-image-amd64/g' {} +
+          sudo find /usr/lib/live/build /usr/share/live/build -type f -exec sed -i \
+            -e 's#/root/isolinux/isolinux.bin#/usr/lib/ISOLINUX/isolinux.bin#g' \
+            -e 's#/root/isolinux/vesamenu.c32#/usr/lib/syslinux/modules/bios/vesamenu.c32#g' {} +
 
       - name: Extract canonical Stage 0 source
         run: |
