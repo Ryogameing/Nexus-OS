@@ -37,7 +37,7 @@ jobs:
         run: |
           git clone --depth 1 https://salsa.debian.org/live-team/live-build.git /tmp/current-live-build
           sudo make -C /tmp/current-live-build install
-          /usr/local/bin/lb --version
+          lb --version
 
       - name: Extract canonical Stage 0 source
         run: |
@@ -62,9 +62,7 @@ jobs:
 
       - name: Build hybrid desktop ISO
         working-directory: source/Nexus-OS
-        env:
-          PATH: /usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin
-        run: sudo --preserve-env=PATH ./scripts/build-iso.sh desktop
+        run: sudo ./scripts/build-iso.sh desktop
 
       - name: Verify checksum
         working-directory: source/Nexus-OS
