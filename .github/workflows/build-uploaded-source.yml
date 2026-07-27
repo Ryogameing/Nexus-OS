@@ -28,7 +28,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            git unzip cmake ninja-build g++ \
+            git gettext unzip cmake ninja-build g++ \
             live-build xorriso debootstrap squashfs-tools debian-archive-keyring \
             grub-pc-bin grub-efi-amd64-bin mtools \
             qemu-system-x86 ovmf
