@@ -49,6 +49,7 @@ jobs:
       - name: Apply Debian 13 repository compatibility
         run: |
           sed -i 's/bookworm/trixie/g' source/Nexus-OS/distro/live-build/auto/config
+          sed -i 's/quiet splash/console=ttyS0,115200n8/g' source/Nexus-OS/distro/live-build/auto/config
           sed -i 's/--binary-images/--binary-image/' source/Nexus-OS/distro/live-build/auto/config
           sed -i '/--mirror-binary-security/a\  --security false \\' source/Nexus-OS/distro/live-build/auto/config
           sed -i '/--security false/a\  --apt-indices false \\' source/Nexus-OS/distro/live-build/auto/config
@@ -78,13 +79,22 @@ jobs:
 
       - name: Verify BIOS boot
         working-directory: source/Nexus-OS
-        run: sudo env NEXUS_QEMU_TIMEOUT=240 ./scripts/test-iso-qemu.sh dist/*.iso bios
+        run: |
+          if ! sudo env NEXUS_QEMU_TIMEOUT=240 ./scripts/test-iso-qemu.sh dist/*.iso bios; then
+            sudo cat dist/*.bios.qemu.log
+            exit 1
+          fi
 
       - name: Verify UEFI boot
         working-directory: source/Nexus-OS
-        run: sudo env NEXUS_QEMU_TIMEOUT=240 ./scripts/test-iso-qemu.sh dist/*.iso uefi
+        run: |
+          if ! sudo env NEXUS_QEMU_TIMEOUT=240 ./scripts/test-iso-qemu.sh dist/*.iso uefi; then
+            sudo cat dist/*.uefi.qemu.log
+            exit 1
+          fi
 
       - name: Upload Rufus-ready ISO
+        if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: NexusOS-Rufus-ready-desktop-amd64
