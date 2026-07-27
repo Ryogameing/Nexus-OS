@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - "Nexus-OS-Stage0-local-repository.zip"
+      - "Nexus-OS-Stage0-r2-local-repository.zip"
       - ".github/workflows/build-uploaded-source.yml"
   workflow_dispatch:
 
@@ -29,7 +29,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y \
             unzip cmake ninja-build g++ \
-            live-build xorriso debootstrap squashfs-tools \
+            live-build xorriso debootstrap squashfs-tools debian-archive-keyring \
             grub-pc-bin grub-efi-amd64-bin mtools \
             qemu-system-x86 ovmf
 
@@ -37,7 +37,7 @@ jobs:
         run: |
           rm -rf source
           mkdir source
-          unzip -q Nexus-OS-Stage0-local-repository.zip -d source
+          unzip -q Nexus-OS-Stage0-r2-local-repository.zip -d source
           test -x source/Nexus-OS/scripts/build-iso.sh
 
       - name: Validate source
