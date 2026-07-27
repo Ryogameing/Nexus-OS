@@ -93,13 +93,62 @@ jobs:
             exit 1
           fi
 
-      - name: Upload Rufus-ready ISO
+      - name: Split Rufus-ready ISO for download
+        if: always()
+        working-directory: source/Nexus-OS
+        run: |
+          ISO="$(find dist -maxdepth 1 -type f -name '*.iso' -print -quit)"
+          test -n "$ISO"
+          split -b 390M -d -a 2 "$ISO" "$ISO.part-"
+          test -f "$ISO.part-03"
+          ls -lh "$ISO" "$ISO".part-*
+
+      - name: Upload ISO part 00
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: NexusOS-Rufus-ready-desktop-amd64
+          name: NexusOS-ISO-part-00
+          path: source/Nexus-OS/dist/*.iso.part-00
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
+
+      - name: Upload ISO part 01
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: NexusOS-ISO-part-01
+          path: source/Nexus-OS/dist/*.iso.part-01
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
+
+      - name: Upload ISO part 02
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: NexusOS-ISO-part-02
+          path: source/Nexus-OS/dist/*.iso.part-02
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
+
+      - name: Upload ISO part 03
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: NexusOS-ISO-part-03
+          path: source/Nexus-OS/dist/*.iso.part-03
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
+
+      - name: Upload ISO verification metadata
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: NexusOS-ISO-verification
           path: |
-            source/Nexus-OS/dist/*.iso
             source/Nexus-OS/dist/*.iso.sha256
             source/Nexus-OS/dist/*.qemu.log
           if-no-files-found: error
