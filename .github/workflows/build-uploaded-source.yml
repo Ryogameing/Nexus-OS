@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - "Nexus-OS-Stage0-r2-local-repository.zip"
+      - "Nexus-OS-Stage0-r3-local-repository.zip"
       - ".github/workflows/build-uploaded-source.yml"
   workflow_dispatch:
 
@@ -37,7 +37,7 @@ jobs:
         run: |
           rm -rf source
           mkdir source
-          unzip -q Nexus-OS-Stage0-r2-local-repository.zip -d source
+          unzip -q Nexus-OS-Stage0-r3-local-repository.zip -d source
           test -x source/Nexus-OS/scripts/build-iso.sh
 
       - name: Validate source
