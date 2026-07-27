@@ -68,7 +68,7 @@ jobs:
           sudo ./scripts/build-iso.sh desktop
           status=$?
           set -e
-          generated=$(find distro/live-build/.build/desktop -maxdepth 1 -name '*.iso' -print -quit)
+          generated=$(sudo find distro/live-build/.build/desktop -maxdepth 1 -name '*.iso' -print -quit)
           if [[ -n "$generated" ]]; then
             version=$(tr -d '[:space:]' < VERSION)
             output=dist/NexusOS-${version}-desktop-amd64.iso
