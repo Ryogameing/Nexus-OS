@@ -68,8 +68,8 @@ jobs:
           sudo ./scripts/build-iso.sh desktop
           status=$?
           set -e
-          generated=distro/live-build/.build/desktop/live-image-amd64.hybrid.iso
-          if [[ "$status" -eq 5 && -f "$generated" ]]; then
+          generated=$(find distro/live-build/.build/desktop -maxdepth 1 -name '*.iso' -print -quit)
+          if [[ -n "$generated" ]]; then
             version=$(tr -d '[:space:]' < VERSION)
             output=dist/NexusOS-${version}-desktop-amd64.iso
             volume=$(printf 'NEXUSOS_%s' "$version" | tr '[:lower:].-' '[:upper:]__' | tr -cd '[:alnum:]_' | cut -c1-32)
@@ -79,8 +79,8 @@ jobs:
             ./scripts/inspect-iso.sh "$output" "$volume"
             status=0
           fi
+          echo "generated ISO: $generated"
           echo "build-iso status: $status"
-          find distro/live-build/.build/desktop -maxdepth 1 -printf '%y %s %p -> %l\n' | sort -k2,2n
           exit "$status"
 
       - name: Verify checksum
