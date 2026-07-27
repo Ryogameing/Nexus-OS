@@ -64,10 +64,8 @@ jobs:
       - name: Build hybrid desktop ISO
         working-directory: source/Nexus-OS
         run: |
-          set +e
-          sudo ./scripts/build-iso.sh desktop
-          status=$?
-          set -e
+          status=0
+          sudo ./scripts/build-iso.sh desktop || status=$?
           generated=$(sudo find distro/live-build/.build/desktop -maxdepth 1 -name '*.iso' -print -quit)
           if [[ -n "$generated" ]]; then
             version=$(tr -d '[:space:]' < VERSION)
