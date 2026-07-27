@@ -33,12 +33,14 @@ jobs:
             grub-pc-bin grub-efi-amd64-bin mtools \
             qemu-system-x86 ovmf
 
-      - name: Patch legacy live-build Contents index paths
+      - name: Patch legacy live-build for current Debian
         run: |
           sudo sed -i 's#/dists/${LB_PARENT_DISTRIBUTION}/Contents-#/dists/${LB_PARENT_DISTRIBUTION}/main/Contents-#g' \
             /usr/lib/live/build/lb_chroot_linux-image \
             /usr/lib/live/build/lb_binary_debian-installer
           grep -F '/main/Contents-' /usr/lib/live/build/lb_chroot_linux-image /usr/lib/live/build/lb_binary_debian-installer
+          sudo grep -rlZ 'live-config-sysvinit' /usr/lib/live/build | sudo xargs -0 sed -i 's/live-config-sysvinit//g'
+          if sudo grep -r 'live-config-sysvinit' /usr/lib/live/build; then exit 1; fi
 
       - name: Extract canonical Stage 0 source
         run: |
