@@ -68,7 +68,7 @@ jobs:
           status=$?
           set -e"""
           new = """set +e
-          MONITOR_SOCKET="/tmp/nexusos-qemu-$MODE-$.sock"
+          MONITOR_SOCKET="/tmp/nexusos-qemu-$MODE-$RANDOM.sock"
           rm -f "$MONITOR_SOCKET"
           timeout "$TIMEOUT" qemu-system-x86_64 "${QEMU_ARGS[@]}" -monitor "unix:$MONITOR_SOCKET,server,nowait" >"$LOG" 2>&1 &
           qemu_pid=$!
@@ -78,7 +78,7 @@ jobs:
           done
           if [[ -S "$MONITOR_SOCKET" ]]; then
             sleep 3
-            printf 'sendkey ret\\n' | socat - "UNIX-CONNECT:$MONITOR_SOCKET" >/dev/null 2>&1
+            printf 'sendkey ret\n' | socat - "UNIX-CONNECT:$MONITOR_SOCKET" >/dev/null 2>&1
           fi
           wait "$qemu_pid"
           status=$?
