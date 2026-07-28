@@ -77,8 +77,10 @@ jobs:
             sleep 0.1
           done
           if [[ -S "$MONITOR_SOCKET" ]]; then
-            sleep 3
-            printf 'sendkey ret\n' | socat - "UNIX-CONNECT:$MONITOR_SOCKET" >/dev/null 2>&1
+            for _ in $(seq 1 15); do
+              sleep 2
+              printf 'sendkey ret\n' | socat - "UNIX-CONNECT:$MONITOR_SOCKET" >/dev/null 2>&1
+            done
           fi
           wait "$qemu_pid"
           status=$?
