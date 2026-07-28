@@ -60,8 +60,9 @@ jobs:
           sed -i '/inspect-iso/d' source/Nexus-OS/scripts/build-iso.sh
           mkdir -p source/Nexus-OS/distro/live-build/config/includes.chroot/etc/systemd/system/multi-user.target.wants
           ln -sf ../nexus-boot-marker.service source/Nexus-OS/distro/live-build/config/includes.chroot/etc/systemd/system/multi-user.target.wants/nexus-boot-marker.service
-          mkdir -p source/Nexus-OS/distro/live-build/config/bootloaders/isolinux
-          printf '%s\n' 'include menu.cfg' 'default vesamenu.c32' 'prompt 0' 'timeout 50' > source/Nexus-OS/distro/live-build/config/bootloaders/isolinux/isolinux.cfg
+          rm -rf source/Nexus-OS/distro/live-build/config/bootloaders
+          cp -a /usr/share/live/build/bootloaders source/Nexus-OS/distro/live-build/config/bootloaders
+          sed -i 's/^timeout .*/timeout 50/' source/Nexus-OS/distro/live-build/config/bootloaders/isolinux/isolinux.cfg
           mkdir -p source/Nexus-OS/distro/live-build/config/archives
           printf '%s\n' 'deb http://security.debian.org/debian-security trixie-security main contrib non-free-firmware' > source/Nexus-OS/distro/live-build/config/archives/debian-security.list.chroot
           sed -i -e 's/^live-config$/live-config-systemd/' -e '/^steam-installer$/d' -e '/^gamescope$/d' source/Nexus-OS/distro/live-build/config/package-lists/nexusos.list.chroot
